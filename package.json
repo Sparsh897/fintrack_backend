@@ -1,0 +1,48 @@
+{
+  "name": "fintrack-backend",
+  "version": "1.0.0",
+  "description": "Fintrack Backend API with MongoDB and JWT Authentication",
+  "main": "index-mongodb.js",
+  "type": "module",
+  "scripts": {
+    "dev": "NODE_ENV=development tsx index-mongodb.ts",
+    "build": "tsc && node build-fix.js",
+    "start": "NODE_ENV=production node dist/index-mongodb.js",
+    "start:dev": "NODE_ENV=development node dist/index-mongodb.js",
+    "check": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "fintrack",
+    "api",
+    "mongodb",
+    "jwt",
+    "authentication",
+    "express",
+    "typescript"
+  ],
+  "author": "Fintrack Team",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.21.2",
+    "mongoose": "^8.8.4",
+    "jsonwebtoken": "^9.0.2",
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16.4.7",
+    "cors": "^2.8.5",
+    "helmet": "^8.0.0",
+    "express-rate-limit": "^7.4.1"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/jsonwebtoken": "^9.0.7",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cors": "^2.8.17",
+    "@types/node": "^20.16.11",
+    "tsx": "^4.20.5",
+    "typescript": "^5.6.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
