@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { User } from '../models/User';
-import { generateToken, generateOTP } from '../utils/jwt';
+import { generateToken, generateOTP, verifyToken } from '../utils/jwt';
+import { authenticateToken } from '../middleware/auth';
 
 const router = Router();
 
@@ -138,24 +139,34 @@ router.post('/verify-otp', async (req, res) => {
 });
 
 // Update user profile
-router.put('/profile', async (req, res) => {
+router.put('/profile', authenticateToken, async (req, res) => {
   try {
-    const authHeader = req.headers.authorization;
-    const token = authHeader && authHeader.split(' ')[1];
+    const { name, email } = req.body;
+    const userId = req.user!.userId;
 
-    if (!token) {
-      return res.status(401).json({ error: 'Authentication required' });
+    // Find and update user
+    const user = await User.findById(userId);
+    
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
     }
 
-    // This is a simplified version - in production, use the auth middleware
-    const { name, email } = req.body;
+    // Update fields if provided
+    if (name !== undefined) user.name = name;
+    if (email !== undefined) user.email = email;
 
-    // For now, just return success
-    // In production, decode token and update user
+    await user.save();
+
     res.json({
       success: true,
       message: 'Profile updated successfully',
-      user: { name, email }
+      user: {
+        id: user._id,
+        phoneNumber: user.phoneNumber,
+        name: user.name,
+        email: user.email,
+        isVerified: user.isVerified
+      }
     });
 
   } catch (error) {
@@ -167,26 +178,28 @@ router.put('/profile', async (req, res) => {
   }
 });
 
-// Get current user
-router.get('/me', async (req, res) => {
+// Get current user profile
+router.get('/me', authenticateToken, async (req, res) => {
   try {
-    const authHeader = req.headers.authorization;
-    const token = authHeader && authHeader.split(' ')[1];
+    const userId = req.user!.userId;
 
-    if (!token) {
-      return res.status(401).json({ error: 'Authentication required' });
+    // Get user from database
+    const user = await User.findById(userId).select('-otp -otpExpiry');
+    
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
     }
 
-    // For now, return dummy user data
-    // In production, decode token and get user from database
     res.json({
       success: true,
       user: {
-        id: '507f1f77bcf86cd799439011',
-        phoneNumber: '9876543210',
-        name: 'Hasmukh Vaishnav',
-        email: 'hasmukh@example.com',
-        isVerified: true
+        id: user._id,
+        phoneNumber: user.phoneNumber,
+        name: user.name,
+        email: user.email,
+        isVerified: user.isVerified,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt
       }
     });
 
