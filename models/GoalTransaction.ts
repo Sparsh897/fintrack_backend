@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IGoalTransaction extends Document {
+  userId: string;
   goalId: mongoose.Types.ObjectId;
   type: 'deposit' | 'withdraw' | 'payment';
   amount: number;
@@ -11,6 +12,11 @@ export interface IGoalTransaction extends Document {
 }
 
 const GoalTransactionSchema = new Schema<IGoalTransaction>({
+  userId: {
+    type: String,
+    required: true,
+    index: true
+  },
   goalId: {
     type: Schema.Types.ObjectId,
     ref: 'Goal',
@@ -40,6 +46,7 @@ const GoalTransactionSchema = new Schema<IGoalTransaction>({
 });
 
 // Add indexes
+GoalTransactionSchema.index({ userId: 1, goalId: 1, date: -1 });
 GoalTransactionSchema.index({ goalId: 1, date: -1 });
 GoalTransactionSchema.index({ type: 1 });
 

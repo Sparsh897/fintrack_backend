@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IInvestment extends Document {
+  userId: string;
   type: 'gold' | 'silver';
   carat?: '22K' | '24K'; // Only for gold
   quantity: number; // in grams
@@ -12,6 +13,11 @@ export interface IInvestment extends Document {
 }
 
 const InvestmentSchema = new Schema<IInvestment>({
+  userId: {
+    type: String,
+    required: true,
+    index: true
+  },
   type: {
     type: String,
     required: true,
@@ -49,7 +55,8 @@ const InvestmentSchema = new Schema<IInvestment>({
 });
 
 // Add indexes for better query performance
-InvestmentSchema.index({ type: 1, date: -1 });
+InvestmentSchema.index({ userId: 1, date: -1 });
+InvestmentSchema.index({ userId: 1, type: 1, date: -1 });
 InvestmentSchema.index({ type: 1, carat: 1 });
 
 // Validation: Silver should not have carat

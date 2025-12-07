@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
 export interface ITransaction extends Document {
+  userId: mongoose.Types.ObjectId;
   type: 'income' | 'expense';
   amount: number;
   category: string;
@@ -11,6 +12,12 @@ export interface ITransaction extends Document {
 }
 
 const TransactionSchema = new Schema<ITransaction>({
+  userId: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+    index: true
+  },
   type: {
     type: String,
     required: true,
@@ -40,7 +47,7 @@ const TransactionSchema = new Schema<ITransaction>({
 });
 
 // Add indexes for better query performance
-TransactionSchema.index({ type: 1, date: -1 });
-TransactionSchema.index({ category: 1 });
+TransactionSchema.index({ userId: 1, type: 1, date: -1 });
+TransactionSchema.index({ userId: 1, category: 1 });
 
 export const Transaction = mongoose.model<ITransaction>('Transaction', TransactionSchema);

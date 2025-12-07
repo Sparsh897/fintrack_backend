@@ -18,7 +18,7 @@ export function registerRoutes(app: Express): Server {
   // Get all transactions
   app.get("/api/transactions", authenticateToken, async (req, res) => {
     try {
-      const transactions = await Transaction.find().sort({ date: -1 });
+      const transactions = await Transaction.find({ userId: req.user!.userId }).sort({ date: -1 });
       res.json(transactions);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch transactions" });
@@ -28,7 +28,10 @@ export function registerRoutes(app: Express): Server {
   // Create transaction
   app.post("/api/transactions", authenticateToken, async (req, res) => {
     try {
-      const transaction = new Transaction(req.body);
+      const transaction = new Transaction({
+        ...req.body,
+        userId: req.user!.userId
+      });
       await transaction.save();
       res.status(201).json(transaction);
     } catch (error) {
@@ -39,14 +42,22 @@ export function registerRoutes(app: Express): Server {
   // Update transaction
   app.put("/api/transactions/:id", authenticateToken, async (req, res) => {
     try {
-      const transaction = await Transaction.findByIdAndUpdate(
-        req.params.id,
-        req.body,
-        { new: true, runValidators: true }
-      );
-      if (!transaction) {
+      // First check if transaction belongs to user
+      const existingTransaction = await Transaction.findOne({ 
+        _id: req.params.id, 
+        userId: req.user!.userId 
+      });
+      
+      if (!existingTransaction) {
         return res.status(404).json({ error: "Transaction not found" });
       }
+
+      const transaction = await Transaction.findByIdAndUpdate(
+        req.params.id,
+        { ...req.body, userId: req.user!.userId },
+        { new: true, runValidators: true }
+      );
+      
       res.json(transaction);
     } catch (error) {
       res.status(400).json({ error: "Failed to update transaction" });
@@ -56,7 +67,11 @@ export function registerRoutes(app: Express): Server {
   // Delete transaction
   app.delete("/api/transactions/:id", authenticateToken, async (req, res) => {
     try {
-      const transaction = await Transaction.findByIdAndDelete(req.params.id);
+      const transaction = await Transaction.findOneAndDelete({ 
+        _id: req.params.id, 
+        userId: req.user!.userId 
+      });
+      
       if (!transaction) {
         return res.status(404).json({ error: "Transaction not found" });
       }
@@ -71,7 +86,7 @@ export function registerRoutes(app: Express): Server {
   // Get all investments
   app.get("/api/investments", authenticateToken, async (req, res) => {
     try {
-      const investments = await Investment.find().sort({ date: -1 });
+      const investments = await Investment.find({ userId: req.user!.userId }).sort({ date: -1 });
       res.json(investments);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch investments" });
@@ -81,7 +96,10 @@ export function registerRoutes(app: Express): Server {
   // Create investment
   app.post("/api/investments", authenticateToken, async (req, res) => {
     try {
-      const investment = new Investment(req.body);
+      const investment = new Investment({
+        ...req.body,
+        userId: req.user!.userId
+      });
       await investment.save();
       res.status(201).json(investment);
     } catch (error) {
@@ -92,14 +110,22 @@ export function registerRoutes(app: Express): Server {
   // Update investment
   app.put("/api/investments/:id", authenticateToken, async (req, res) => {
     try {
-      const investment = await Investment.findByIdAndUpdate(
-        req.params.id,
-        req.body,
-        { new: true, runValidators: true }
-      );
-      if (!investment) {
+      // First check if investment belongs to user
+      const existingInvestment = await Investment.findOne({ 
+        _id: req.params.id, 
+        userId: req.user!.userId 
+      });
+      
+      if (!existingInvestment) {
         return res.status(404).json({ error: "Investment not found" });
       }
+
+      const investment = await Investment.findByIdAndUpdate(
+        req.params.id,
+        { ...req.body, userId: req.user!.userId },
+        { new: true, runValidators: true }
+      );
+      
       res.json(investment);
     } catch (error) {
       res.status(400).json({ error: "Failed to update investment" });
@@ -109,7 +135,11 @@ export function registerRoutes(app: Express): Server {
   // Delete investment
   app.delete("/api/investments/:id", authenticateToken, async (req, res) => {
     try {
-      const investment = await Investment.findByIdAndDelete(req.params.id);
+      const investment = await Investment.findOneAndDelete({ 
+        _id: req.params.id, 
+        userId: req.user!.userId 
+      });
+      
       if (!investment) {
         return res.status(404).json({ error: "Investment not found" });
       }
@@ -124,7 +154,7 @@ export function registerRoutes(app: Express): Server {
   // Get all goals
   app.get("/api/goals", authenticateToken, async (req, res) => {
     try {
-      const goals = await Goal.find().sort({ createdAt: -1 });
+      const goals = await Goal.find({ userId: req.user!.userId }).sort({ createdAt: -1 });
       res.json(goals);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch goals" });
@@ -134,7 +164,11 @@ export function registerRoutes(app: Express): Server {
   // Get single goal
   app.get("/api/goals/:id", authenticateToken, async (req, res) => {
     try {
-      const goal = await Goal.findById(req.params.id);
+      const goal = await Goal.findOne({ 
+        _id: req.params.id, 
+        userId: req.user!.userId 
+      });
+      
       if (!goal) {
         return res.status(404).json({ error: "Goal not found" });
       }
@@ -147,7 +181,10 @@ export function registerRoutes(app: Express): Server {
   // Create goal
   app.post("/api/goals", authenticateToken, async (req, res) => {
     try {
-      const goal = new Goal(req.body);
+      const goal = new Goal({
+        ...req.body,
+        userId: req.user!.userId
+      });
       await goal.save();
       res.status(201).json(goal);
     } catch (error) {
@@ -158,14 +195,22 @@ export function registerRoutes(app: Express): Server {
   // Update goal
   app.put("/api/goals/:id", authenticateToken, async (req, res) => {
     try {
-      const goal = await Goal.findByIdAndUpdate(
-        req.params.id,
-        req.body,
-        { new: true, runValidators: true }
-      );
-      if (!goal) {
+      // First check if goal belongs to user
+      const existingGoal = await Goal.findOne({ 
+        _id: req.params.id, 
+        userId: req.user!.userId 
+      });
+      
+      if (!existingGoal) {
         return res.status(404).json({ error: "Goal not found" });
       }
+
+      const goal = await Goal.findByIdAndUpdate(
+        req.params.id,
+        { ...req.body, userId: req.user!.userId },
+        { new: true, runValidators: true }
+      );
+      
       res.json(goal);
     } catch (error) {
       res.status(400).json({ error: "Failed to update goal" });
@@ -175,13 +220,23 @@ export function registerRoutes(app: Express): Server {
   // Delete goal
   app.delete("/api/goals/:id", authenticateToken, async (req, res) => {
     try {
-      // Also delete all goal transactions
-      await GoalTransaction.deleteMany({ goalId: req.params.id });
+      // First check if goal belongs to user
+      const goal = await Goal.findOne({ 
+        _id: req.params.id, 
+        userId: req.user!.userId 
+      });
       
-      const goal = await Goal.findByIdAndDelete(req.params.id);
       if (!goal) {
         return res.status(404).json({ error: "Goal not found" });
       }
+
+      // Delete all goal transactions for this goal and user
+      await GoalTransaction.deleteMany({ 
+        goalId: req.params.id,
+        userId: req.user!.userId 
+      });
+      
+      await Goal.findByIdAndDelete(req.params.id);
       res.json({ message: "Goal deleted successfully" });
     } catch (error) {
       res.status(500).json({ error: "Failed to delete goal" });
@@ -193,8 +248,21 @@ export function registerRoutes(app: Express): Server {
   // Get goal transactions
   app.get("/api/goals/:goalId/transactions", authenticateToken, async (req, res) => {
     try {
-      const transactions = await GoalTransaction.find({ goalId: req.params.goalId })
-        .sort({ date: -1 });
+      // First verify the goal belongs to the user
+      const goal = await Goal.findOne({ 
+        _id: req.params.goalId, 
+        userId: req.user!.userId 
+      });
+      
+      if (!goal) {
+        return res.status(404).json({ error: "Goal not found" });
+      }
+
+      const transactions = await GoalTransaction.find({ 
+        goalId: req.params.goalId,
+        userId: req.user!.userId 
+      }).sort({ date: -1 });
+      
       res.json(transactions);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch goal transactions" });
@@ -207,14 +275,19 @@ export function registerRoutes(app: Express): Server {
       const { type, amount, description } = req.body;
       const goalId = req.params.goalId;
 
-      // Find the goal
-      const goal = await Goal.findById(goalId);
+      // Find the goal and verify ownership
+      const goal = await Goal.findOne({ 
+        _id: goalId, 
+        userId: req.user!.userId 
+      });
+      
       if (!goal) {
         return res.status(404).json({ error: "Goal not found" });
       }
 
       // Create the transaction
       const transaction = new GoalTransaction({
+        userId: req.user!.userId,
         goalId,
         type,
         amount,

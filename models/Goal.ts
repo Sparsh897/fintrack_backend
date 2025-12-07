@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IGoal extends Document {
+  userId: string;
   name: string;
   targetAmount: number;
   currentAmount: number;
@@ -12,6 +13,11 @@ export interface IGoal extends Document {
 }
 
 const GoalSchema = new Schema<IGoal>({
+  userId: {
+    type: String,
+    required: true,
+    index: true
+  },
   name: {
     type: String,
     required: true,
@@ -50,7 +56,8 @@ GoalSchema.virtual('progress').get(function(this: IGoal) {
 });
 
 // Add indexes
-GoalSchema.index({ name: 1 });
+GoalSchema.index({ userId: 1, createdAt: -1 });
+GoalSchema.index({ userId: 1, name: 1 });
 GoalSchema.index({ targetDate: 1 });
 
 export const Goal = mongoose.model<IGoal>('Goal', GoalSchema);
