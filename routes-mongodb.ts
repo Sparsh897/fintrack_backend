@@ -6,12 +6,16 @@ import { Goal } from "./models/Goal";
 import { GoalTransaction } from "./models/GoalTransaction";
 import { authenticateToken } from "./middleware/auth";
 import authRoutes from "./routes/auth";
+import splitBillsRoutes from "./routes/split-bills";
 
 export function registerRoutes(app: Express): Server {
   const httpServer = createServer(app);
 
   // Authentication routes (no middleware needed)
   app.use("/api/auth", authRoutes);
+
+  // Split Bills routes (protected)
+  app.use("/api/split-bills", splitBillsRoutes);
 
   // TRANSACTIONS ROUTES (Protected)
   

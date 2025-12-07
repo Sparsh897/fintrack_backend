@@ -73,7 +73,8 @@ app.get('/', (req, res) => {
       auth: '/api/auth/*',
       transactions: '/api/transactions',
       investments: '/api/investments',
-      goals: '/api/goals'
+      goals: '/api/goals',
+      splitBills: '/api/split-bills'
     }
   });
 });
